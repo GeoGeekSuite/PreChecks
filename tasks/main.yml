@@ -1,0 +1,19 @@
+---
+# tasks file for prechecks
+- name: Debug OS
+  debug:
+    msg: 'Check if {{ ansible_distribution }} is supported'
+- name: Check if OS is supported
+  fail:
+    msg: "Designed for Ubuntu or CentOS"
+  when: 'not ansible_distribution in {{ supported_os }}'
+- name: Get CPU count
+  shell: "cat /proc/cpuinfo | grep 'cpu cores' | wc -l"
+  register: cpuCount
+- name: Debug CPU counts
+  debug:
+    msg: 'Found {{ cpuCount.stdout|int }} CPUs. Minimum requirement {{ minCpuCount }} CPUs'
+- name: Fail with not sufficient cores
+  fail:
+    msg: "Not sufficient CPU cores"
+  when: cpuCount.stdout|int <= minCpuCount|int
